@@ -73,9 +73,13 @@ class SoundMergePlay {
 
     }
 
-    fun pause()
-    {
+    fun pause() {
 //        mSoundPool.pause()
+    }
+
+    fun release() {
+
+        mSoundPool.release()
     }
 
 
