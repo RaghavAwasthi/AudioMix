@@ -1,16 +1,16 @@
 package com.demo.audiomix
 
 import android.content.Context
-import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.SoundPool
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.demo.audiomix.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
+
     lateinit var mbind: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -20,8 +20,14 @@ class MainActivity : AppCompatActivity() {
         val player = SoundMergePlay()
         player.initialise(arrayListOf(R.raw.sound1, R.raw.sound2), applicationContext, 5)
 
-        mbind.button.setOnClickListener {
+        mbind.play.setOnClickListener {
             player.play()
+        }
+        mbind.pause.setOnClickListener {
+            player.pause()
+        }
+        mbind.release.setOnClickListener {
+            player.release()
         }
 
 
@@ -31,55 +37,43 @@ class MainActivity : AppCompatActivity() {
 class SoundMergePlay {
 
     lateinit var mcontext: Context
+    val mediaplayerlist = ArrayList<MediaPlayer>()
+
     fun initialise(array: ArrayList<Int>, context: Context, maxTrack: Int) {
         this.mcontext = context
-
-        mAudioManager = mcontext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-//        mSoundPool = SoundPool(maxTrack, AudioManager.STREAM_MUSIC, 0)
-        mSoundPool = SoundPool.Builder()
-                .setMaxStreams(5)
-                .setAudioAttributes(AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build())
-                .build()
-
         load(array)
     }
 
-    lateinit var mAudioManager: AudioManager
-    lateinit var mSoundPool: SoundPool
 
-    val soundpoolHashmap = ArrayList<Int>()
     fun play() {
-        val streamVolume = mAudioManager
-                .getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
-
-        soundpoolHashmap.forEachIndexed { index, it ->
-            mSoundPool.play(it, streamVolume, streamVolume, 1, 0, 1f)
+        mediaplayerlist.forEachIndexed { index, it ->
+            it.start()
         }
 
     }
 
     fun load(array: ArrayList<Int>) {
         // Accepts an array of resources and loads them into memory
-        mSoundPool.setOnLoadCompleteListener { soundpool, sampleId, status ->
-            soundpoolHashmap.add(sampleId)
-        }
+
 
         array.forEachIndexed() { index, it ->
-            mSoundPool.load(mcontext, it, index)
+            mediaplayerlist.add(MediaPlayer.create(mcontext, it))
         }
 
 
     }
 
     fun pause() {
-//        mSoundPool.pause()
+        mediaplayerlist.forEach {
+            it.pause()
+        }
     }
 
     fun release() {
 
-        mSoundPool.release()
+        mediaplayerlist.forEach {
+            it.release()
+        }
     }
 
 
